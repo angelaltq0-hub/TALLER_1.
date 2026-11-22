@@ -1,0 +1,539 @@
+---
+title: "MODELOS PROBABILISTICOS"
+subtitle: "MODELOS DISCRETOS"
+author: 
+  - name: Luis Felipe Arenas Ramirez<br>Yari Karoline Lozano Rodriguez<br>Angela Liliana Tique Quiroga
+    affiliation: "Escuela Superior de Administracion Publica"
+    affiliation-url: "https://www.esap.edu.co/"
+date: today
+lang: es
+title-block-banner: "#98b6ed"
+
+format:
+  html:
+    page-layout: full
+    fontsize: 14pt
+    toc: true
+    toc-depth: 3
+    toc-location: right
+    number-sections: true
+    code-fold: true
+    code-summary: "Ver código"
+    theme: dark
+    highlight-style: monokai
+    html-math-method: katex
+    smooth-scroll: true
+    link-external-newwindow: true
+    code-overflow: scroll
+    favicon: favicon.ico
+    css: estilos.css
+    
+editor: visual
+
+knitr:
+  opts_chunk:
+    message: false
+    warning: false
+    fig.align: center
+    fig.width: 6
+    fig.height: 6
+    out.width: "70%"
+---
+
+```{=html}
+<div style="position:absolute; top:20px; right:20px;">
+<img src="Logo_Esap.png" width="150">
+</div>
+```
+
+```{=html}
+<style>
+body{
+  background-color:#f7f6ed;
+  font-size:170%;
+  text-align:justify;
+}
+</style>
+```
+
+<br>
+
+# .Activar Paquetes
+
+```{r}
+library(tidyverse)
+library(kableExtra)
+library(dplyr)
+```
+
+<br>
+
+# .Distribucion Binomial
+
+La distribución binomial es un modelo de probabilidad discreta que describe el número de éxitos en una secuencia de n ensayos de Bernoulli independientes. Un ensayo de Bernoulli es un experimento aleatorio con solo dos posibles resultados: éxito o fracaso.
+
+• Características de identificación:
+
+Para que un experimento pueda ser modelado por una distribución binomial, debe cumplir con las siguientes condiciones:
+
+Número fijo de ensayos (n): El experimento se repite un número predeterminado de veces. Por ejemplo, lanzar una moneda 10 veces o examinar 50 productos de una línea de producción.
+
+Dos resultados posibles: Cada ensayo solo puede tener dos resultados, uno de los cuales se considera “éxito” y el otro “fracaso”.
+
+Probabilidad de éxito constante (p): La probabilidad de que ocurra un éxito es la misma en cada ensayo. Por eje\*mplo, la probabilidad de que una moneda caiga cara es siempre 0.5.
+
+Ensayos independientes: El resultado de un ensayo no afecta el resultado de los otros ensayos.
+
+• Fórmula o expresión matemática: La probabilidad de obtener exactamente k éxitos en n ensayos es:
+
+$$P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+
+**Ejercicio 1**
+
+Una alcaldía municipal está realizando un seguimiento a la gestión de su oficina de atención al ciudadano, con el propósito de evaluar el cumplimiento de los tiempos establecidos para responder las solicitudes de la comunidad.
+
+De acuerdo con los registros administrativos, el 75 % de las solicitudes ciudadanas son respondidas dentro del plazo establecido por la entidad.
+
+La oficina de control interno selecciona aleatoriamente una muestra de 12 solicitudes para evaluar su cumplimiento. Se supone que los resultados son independientes y que la probabilidad de responder oportunamente permanece constante.
+
+Sea $X$ la variable aleatoria que representa el número de solicitudes respondidas dentro del plazo establecido.
+
+**Determine:**
+
+1.  ¿Cuál es la probabilidad de que exactamente 9 solicitudes sean respondidas oportunamente?
+
+2.  ¿Cuál es la probabilidad de que más de 9 solicitudes sean respondidas oportunamente?
+
+3.  ¿Cuál es la probabilidad de que menos de 8 solicitudes sean respondidas oportunamente?
+
+```{r}
+n <- 12
+p <- 0.75
+x <- 0:n
+fx <- round(dbinom(x, n, p),4)
+Fx <- round(cumsum(fx),4)
+df = data.frame(x, fx, Fx)
+Form.Basic <- c("striped", "bordered", "hover", "condensed", "responsive")
+kable(df, align = "c") %>% 
+  kable_styling("striped", full_width = F) %>%
+  column_spec(1, bold = T) %>%
+  row_spec(0:13, bold = T, color = "#0b0f0b", background = "#4af7be")
+```
+
+**Graficas**
+
+::: panel-tabset
+## F. PROBABILIDAD
+
+```{r}
+df_1 <- data.frame(x = x, fx = fx, xend = x, fxend = 0)
+
+ggplot(df_1, aes(x = x, y = fx)) +
+  geom_segment(aes(xend = xend, yend = fxend), color = "#eb093a", size = 1) +
+  geom_point(color = "#52f258", size = 2) +
+  labs(title = "Función de probabilidad binomial",
+       x = "x",
+       y = "f(x)")
+```
+
+## F. DISTRIBUCION
+
+```{r}
+df_2 <- data.frame(x = x, Fx = Fx)
+
+ggplot(df_2, aes(x = x, y = Fx)) +
+  geom_step(color = "#eb093a", size = 1) +
+  geom_point(color = "#52f258", size = 2) +
+  labs(title = "Función de distribución binomial",
+       x = "Número de solicitudes Oportunas",
+       y = "Probabilidad Acumulada F(X)") 
+```
+:::
+
+**Solución Incisos**
+
+::: panel-tabset
+## Inciso_1
+
+Exactamente 9 solicitudes respondidas oportunamente.
+
+```{r}
+# Inciso 1: Exactamente 8 solicitudes
+
+n <- 12
+p <- 0.75
+
+P1 <- dbinom(9, size = n, prob = p)
+
+P1
+
+# Resultado en porcentaje
+P1 * 100
+```
+
+## Inciso_2
+
+Mas de 9 solicitudes respondidas oportunamente.
+
+```{r}
+# Inciso 2: Más de 8 solicitudes
+
+n <- 12
+p <- 0.75
+
+P2 <- 1 - pbinom(9, size = n, prob = p)
+
+P2
+
+# Resultado en porcentaje
+P2 * 100
+```
+
+## Inciso_3
+
+Menos de 8 solicitudes respondidas oportunamente.
+
+```{r}
+# Inciso 3: Menos de 7 solicitudes
+
+n <- 12
+p <- 0.75
+
+P3 <- pbinom(7, size = n, prob = p)
+
+P3
+
+# Resultado en porcentaje
+P3 * 100 
+```
+:::
+
+<br>
+
+# .Distribucion de Poisson
+
+La distribución de Poisson es una distribución de probabilidad discreta que expresa la probabilidad de que un número dado de eventos ocurra en un intervalo fijo de tiempo o espacio, si estos eventos ocurren con una tasa promedio constante y son independientes del tiempo transcurrido desde el último evento.
+
+**Definición y Origen**
+
+Esta distribución fue descubierta por el matemático francés Siméon Denis Poisson en 1837. Su trabajo se centró en la teoría de la probabilidad, y esta distribución se utiliza para modelar la ocurrencia de eventos raros en un intervalo.
+
+**Características Clave**
+
+La distribución de Poisson se identifica por las siguientes características:
+
+Eventos discretos: El número de eventos es un conteo de eventos que no pueden ser fraccionados (por ejemplo, no puedes tener 1.5 llamadas).
+
+Independencia: La ocurrencia de un evento no afecta la probabilidad de que ocurra otro.
+
+Tasa constante: El número promedio de eventos por unidad de tiempo o espacio (λ) es constante.
+
+Aleatoriedad: La probabilidad de que ocurra más de un evento en un intervalo muy pequeño es casi nula.
+
+**Fórmula y Expresión Matemática**
+
+La fórmula para calcular la probabilidad de que ocurran exactamente k eventos en un intervalo, dado un promedio de λ eventos, es:
+
+$$P(X=k)=\frac{\lambda^k e^{-\lambda}}{k!}$$
+
+**Ejercicio 2**
+
+Una alcaldía municipal cuenta con una oficina de gestión documental encargada de recibir y registrar las solicitudes de información presentadas por los ciudadanos.
+
+De acuerdo con los registros de la entidad, se reciben en promedio 4 solicitudes de información por hora.
+
+Se supone que las solicitudes llegan de manera independiente y que la tasa promedio de recepción permanece constante durante el periodo analizado.
+
+Sea $X$ la variable aleatoria que representa el número de solicitudes de información recibidas durante una hora.
+
+**Determine:**
+
+1.  ¿Cuál es la probabilidad de recibir exactamente 3 solicitudes durante una hora?
+
+2.  ¿Cuál es la probabilidad de recibir más de 5 solicitudes durante una hora?
+
+3.  ¿Cuál es la probabilidad de recibir entre 2 y 6 solicitudes durante una hora, inclusive?
+
+Por tanto: $$
+X\sim Poisson(\lambda=5)
+$$
+
+**Tabla de Distribucion**
+
+```{r}
+n <- 12 
+lambda <- 4
+x <- 0:n
+fx <- round(dpois(x, lambda = 3), 4)  
+Fx <- round(cumsum(fx), 4)
+df <- data.frame(x, fx, Fx)
+Form.Basic <- c("striped", "bordered", "hover", "condensed", "responsive")
+kable(df, align = "c") %>% 
+  kable_styling("striped", full_width = F) %>%
+  column_spec(1, bold = T) %>%
+  row_spec(0:13, bold = T, color = "#0b0f0b", background = "#4af7be")
+```
+
+**Graficas**
+
+::: panel-tabset
+## F. PROBABILIDAD
+
+```{r}
+x <- 0:n 
+lambda <- 5
+probabilidad <- dpois(x, lambda)
+df_1 <- data.frame(numero_solicitudes = x, probabilidad = probabilidad, 
+                   numero_solicitudes_end = x, probabilidad_end = 0)
+ggplot(df_1, aes(x = numero_solicitudes, y = probabilidad)) +
+  geom_segment(aes(xend = numero_solicitudes_end, yend = probabilidad_end), color = "#eb093a", size = 1) +
+  geom_point(color = "#52f258", size = 2) +
+  labs(title = "Función de probabilidad de Poisson",
+       x = "Número de solicitudes recibidas",
+       y = "Probabilidad F(x)")
+```
+
+## F. DISTRIBUCION
+
+```{r}
+x <- 0:n
+lambda <- 5
+prob_acumulada <- ppois(q = x, lambda = lambda)
+df_2 <- data.frame(numero_solicitudes = x, probabilidad_acumulada = prob_acumulada)
+ggplot(df_2, aes(x = numero_solicitudes, y = probabilidad_acumulada)) +
+  geom_step(color = "#eb093a", size = 1) +
+  geom_point(color = "#52f258", size = 2) +
+  labs(title = "Función de distribución acumulada Poisson",
+       x = "Número de solicitudes recibidas",
+       y = "Probabilidad Acumulada F(x)")
+```
+:::
+
+**Solucion Incisos**
+
+Exactamente 3 solicitudes recibidas durante 1 hora.
+
+::: panel-tabset
+## Inciso 1
+
+```{r}
+# Inciso 1: Exactamente 3 solicitudes
+
+lambda <- 5
+
+P1 <- dpois(3, lambda = lambda)
+
+P1
+
+# Resultado porcentual
+P1 * 100
+```
+
+## Inciso 2
+
+Mas de 5 solicitudes recibidas durante 1 hora.
+
+```{r}
+# Inciso 2: Más de 5 solicitudes
+
+lambda <- 5
+
+P2 <- 1 - ppois(5, lambda = lambda)
+
+P2
+
+# Resultado porcentual
+P2 * 100
+```
+
+## Inciso 3
+
+Entre 2 y 6 solicitudes recibidas durante una hora, inclusive.
+
+```{r}
+# Inciso 3: Entre 2 y 6 solicitudes inclusive
+
+lambda <- 4
+
+P3 <- ppois(6, lambda = lambda) -
+  ppois(1, lambda = lambda)
+
+P3
+
+# Resultado porcentual
+P3 * 100
+```
+:::
+
+<br>
+
+# .Distribución Hipergeométrica
+
+La distribución hipergeométrica es un modelo de probabilidad discreta que permite calcular la probabilidad de obtener un número determinado de éxitos al seleccionar una muestra de una población finita, cuando la selección se realiza sin reemplazo.
+
+A diferencia de la distribución binomial, en la distribución hipergeométrica la probabilidad de éxito puede cambiar en cada selección, debido a que los elementos seleccionados no se devuelven a la población.
+
+**Características de identificacion**
+
+Para que un experimento pueda representarse mediante una distribución hipergeométrica, debe cumplir las siguientes condiciones:
+
+- Población finita (N):\*\* existe una cantidad total y limitada de elementos.
+
+- Éxitos en la población (K): se conoce cuántos elementos de la población poseen la característica que se desea estudiar.
+
+- Tamaño de la muestra (n): se establece previamente cuántos elementos serán seleccionados.
+
+- Selección sin reemplazo: los elementos seleccionados no se devuelven a la población.
+
+- Dos resultados posibles:\*\* cada elemento se clasifica como éxito o fracaso.
+
+**Fórmula y Expresión Matemática**
+
+La probabilidad de obtener exactamente x éxitos en una muestra de tamaño n se calcula mediante:
+
+$$
+P(X=x)=\frac{\binom{K}{x}\binom{N-K}{n-x}}{\binom{N}{n}}
+$$
+
+Donde:
+
+- N: tamaño total de la población.
+- K: número de éxitos en la población.
+- n: tamaño de la muestra.
+- x: número de éxitos que se desea obtener.
+
+**Ejercicio 3**
+
+La oficina de control interno de una alcaldía municipal está realizando una auditoría a los expedientes relacionados con los contratos de prestación de servicios de la entidad.
+
+Durante la revisión se identificó que, de un total de 20 expedientes, 6 presentan inconsistencias en su documentación y los otros 14 se encuentran correctamente diligenciados.
+
+Para realizar el proceso de auditoría, se seleccionan aleatoriamente 5 expedientes, sin reemplazo, con el propósito de verificar la cantidad de documentos que presentan inconsistencias.
+
+Sea $X$ la variable aleatoria que representa el número de expedientes con inconsistencias encontrados en la muestra seleccionada.
+
+**Determine:**
+
+1.  ¿Cuál es la probabilidad de que exactamente 2 expedientes presenten inconsistencias?
+
+2.  ¿Cuál es la probabilidad de que al menos 2 expedientes presenten inconsistencias?
+
+3.  ¿Cuál es la probabilidad de que menos de 2 expedientes presenten inconsistencias?
+
+Por tanto: $$
+X\sim Poisson(\lambda=5)
+$$
+
+**Tabla de Distribucion**
+
+```{r}
+N <- 20
+K <- 4
+n <- 5
+x <- 0:5
+fx <- round(dhyper(x, m = 6, n = 14, k = 5), 4)  
+Fx <- round(phyper(x, m = 6, n = 14, k = 5), 4) 
+df <- data.frame(x, fx, Fx)
+Form.Basic <- c("striped", "bordered", "hover", "condensed", "responsive") 
+kable(df, align = "c") %>% 
+  kable_styling("striped", full_width = F) %>%
+  column_spec(1, bold = T) %>%
+  row_spec(0:5, bold = T, color = "#0b0f0b", background = "#4af7be")
+```
+
+**Graficas**
+
+::: panel-tabset
+## F. PROBABILIDAD
+
+```{r}
+x <- 0:n 
+lambda <- 5
+probabilidad <- dpois(x, lambda)
+df_1 <- data.frame(numero_solicitudes = x, probabilidad = probabilidad, 
+                   numero_solicitudes_end = x, probabilidad_end = 0)
+ggplot(df_1, aes(x = numero_solicitudes, y = probabilidad)) +
+  geom_segment(aes(xend = numero_solicitudes_end, yend = probabilidad_end), color = "#eb093a", size = 1) +
+  geom_point(color = "#52f258", size = 2) +
+  labs(title = "Función de probabilidad hipergeométrica",
+       x = "Expediente de incosistencias",
+       y = "Probabilidad f(x)")
+```
+
+## F. DISTRIBUCION
+
+```{r}
+x <- 0:n
+lambda <- 5
+prob_acumulada <- ppois(q = x, lambda = lambda)
+df_2 <- data.frame(numero_solicitudes = x, probabilidad_acumulada = prob_acumulada)
+ggplot(df_2, aes(x = numero_solicitudes, y = probabilidad_acumulada)) +
+  geom_step(color = "#eb093a", size = 1) +
+  geom_point(color = "#52f258", size = 2) +
+  labs(title = "Función de distribución hepergeométrica",
+       x = "Expedientes con inconsistencias",
+       y = "Probabilidad Acumulada F(x)")
+```
+:::
+
+**Solucion Incisos**
+
+::: panel-tabset
+## Inciso 1
+
+Exactamente 2 expedientes presentan inconsistencias.
+
+```{r}
+# Inciso 1: Exactamente 2 expedientes
+
+N <- 20
+K <- 6
+n <- 5
+
+P1 <- dhyper(2, m = K, n = N-K, k = n)
+
+P1
+
+# Resultado porcentual
+P1 * 100
+```
+
+## Inciso 2
+
+Al menos 2 expedientes presentan inconsistencias
+
+```{r}
+# Inciso 2: Al menos 2 expedientes
+
+N <- 20
+K <- 6
+n <- 5
+
+P2 <- 1 - phyper(1, m = K, n = N-K, k = n)
+
+
+P2
+
+# Resultado porcentual
+P2 * 100
+```
+
+## Inciso 3
+
+Menos de 2 expedientes presentan inconsistencias.
+
+```{r}
+# Inciso 3: Menos de 2 expedientes
+
+N <- 20
+K <- 6
+n <- 5
+
+P3 <- phyper(1, m = K, n = N-K, k = n) 
+
+P3
+
+# Resultado porcentual
+P3 * 100
+```
+:::
